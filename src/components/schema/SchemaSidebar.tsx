@@ -137,12 +137,6 @@ function SchemaContent({
     return [...map.entries()]
   }, [filteredTables])
 
-  const schemaSummary = useMemo(() => {
-    const names = [...new Set((schema?.tables ?? []).map((table) => table.schema))]
-    if (names.length === 0) return 'public'
-    return names.length === 1 ? names[0] : `${names.length} schemas`
-  }, [schema])
-
   const toggleTable = (key: string) => {
     setExpanded((current) => {
       const next = new Set(current)

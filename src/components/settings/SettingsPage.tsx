@@ -1,4 +1,4 @@
-import { RotateCcw, Type } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useNotebookStore } from "@/store/notebook";
 import { useSettingsStore } from "@/store/settings";
