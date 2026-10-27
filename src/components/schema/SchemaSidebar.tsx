@@ -7,27 +7,14 @@
   PanelLeftClose,
   PanelLeftOpen,
   RefreshCw,
-  RotateCcw,
   Search,
   Table2,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { focusEditor, insertIntoEditor } from '@/lib/editorRegistry'
 import { formatBytes, formatNumber, qualifiedTableName } from '@/lib/format'
@@ -119,9 +106,7 @@ function SchemaContent({
   const status = useDbStore((state) => state.status)
   const error = useDbStore((state) => state.error)
   const schemaLoading = useDbStore((state) => state.schemaLoading)
-  const resetting = useDbStore((state) => state.resetting)
   const refreshSchema = useDbStore((state) => state.refreshSchema)
-  const reset = useDbStore((state) => state.reset)
   const init = useDbStore((state) => state.init)
 
   const [search, setSearch] = useState('')
@@ -174,17 +159,6 @@ function SchemaContent({
     onNavigate?.()
   }
 
-  const handleReset = () => {
-    void reset()
-      .then(() => {
-        useNotebookStore.getState().clearRuns()
-        toast.success('Demo database reset')
-      })
-      .catch((resetError: unknown) => {
-        toast.error(resetError instanceof Error ? resetError.message : 'Failed to reset database')
-      })
-  }
-
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-2 border-b border-border/60 px-3 py-2.5">
@@ -192,25 +166,8 @@ function SchemaContent({
           <Database className="size-3.5" />
         </div>
         <div className="min-w-0 flex-1 leading-tight">
-          <div className="text-[11px] font-medium">Schema</div>
-          <div className="truncate font-mono text-[9.5px] text-muted-foreground">
-            {schema ? `${schema.tables.length} relations · ${schemaSummary}` : 'connecting…'}
-          </div>
+          <div className="text-[12px] font-medium">Schema</div>
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => void refreshSchema()}
-              disabled={status !== 'ready' || schemaLoading}
-              aria-label="Refresh schema"
-            >
-              <RefreshCw className={cn(schemaLoading && 'animate-spin')} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Refresh schema</TooltipContent>
-        </Tooltip>
 
         {onCollapse ? (
           <Tooltip>
@@ -229,18 +186,34 @@ function SchemaContent({
         ) : null}
       </div>
 
-      <div className="px-2.5 pt-2.5">
-        <div className="relative">
-          <Search className="pointer-events-none absolute top-1/2 left-2 size-3 -translate-y-1/2 text-muted-foreground/60" />
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search tables & columns"
-            className="h-7 bg-background/50 pl-6.5 text-[11px] placeholder:text-[11px]"
-            aria-label="Search schema"
-          />
-        </div>
-      </div>
+      <div className="px-2.5 pt-2.5 text-[10px] text-muted-foreground">
+        <Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							size="sm"
+              variant="outline"
+							onClick={() => void refreshSchema()}
+							disabled={status !== "ready" || schemaLoading}
+							aria-label="Refresh schema"
+              className="flex item-center gap-2 text-[11px]"
+						>
+							<RefreshCw className={cn(schemaLoading && "animate-spin")} />
+							Refresh Schema
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent>Refresh schema</TooltipContent>
+				</Tooltip>
+				<div className="relative flex items-center mt-2.5">
+					<Search className="pointer-events-none absolute text-muted-foreground/60 top-1/2 left-2 size-3 -translate-y-1/2 " />
+					<Input
+						value={search}
+						onChange={(event) => setSearch(event.target.value)}
+						placeholder="Search tables & columns"
+						className="h-7 bg-background/50 pl-6 text-[11px] placeholder:text-[11px]"
+						aria-label="Search schema"
+					/>
+				</div>
+			</div>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-1.5 py-2">
         {status === 'error' ? (
@@ -336,38 +309,9 @@ function SchemaContent({
 
       <div className="mt-auto border-t border-border/60 p-2.5">
         <div className="mb-1.5 flex items-center justify-between font-mono text-[9.5px] text-muted-foreground/70">
-          <span>{schema ? formatNumber(schema.tables.length) : '—'} relations</span>
+          <span>{schema ? formatNumber(schema.tables.length) : '—'} tables</span>
           <span>{schema ? formatBytes(schema.databaseSize) : '—'}</span>
         </div>
-
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-full justify-start gap-1.5 px-1.5 text-[10.5px] text-muted-foreground hover:text-destructive"
-              disabled={resetting || status !== 'ready'}
-            >
-              {resetting ? <Spinner className="size-3" /> : <RotateCcw className="size-3" />}
-              Reset demo database
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Reset the demo database?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Every table is dropped and recreated with the original seed data. Any changes
-                you made to the database will be lost. Your notebook queries are kept.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" onClick={handleReset}>
-                Reset database
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </div>
   )

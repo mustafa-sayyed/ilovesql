@@ -71,9 +71,9 @@ export function StatusBar({
 
 			{view === "notebook" ?
 				<span className="hidden items-center gap-2 text-muted-foreground/55 lg:flex">
-					<span className="text-muted-foreground/25">A�</span>
-					<span>{IS_MAC ? "�O~" : "Ctrl"} K commands</span>
-					<span className="text-muted-foreground/25">A�</span>
+					<span className="text-muted-foreground/25">|</span>
+					<span>{IS_MAC ? "Cmd" : "Ctrl"} K commands</span>
+					<span className="text-muted-foreground/25">|</span>
 					<span>Shift Enter run</span>
 				</span>
 			:	null}
