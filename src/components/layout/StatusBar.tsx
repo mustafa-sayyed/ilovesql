@@ -4,6 +4,7 @@ import { formatBytes, formatNumber, pluralize } from "@/lib/format";
 import { useDbStore } from "@/store/db";
 import { getNotebookCount, useNotebookStore } from "@/store/notebook";
 import { useSettingsStore } from "@/store/settings";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 const IS_MAC =
 	typeof navigator !== "undefined" &&
@@ -57,7 +58,17 @@ export function StatusBar({
 					className="rounded-sm bg-warning/10 px-1.5 py-0.5 text-[8.5px] text-warning"
 					title="This tab is not the database leader; queries are proxied to the leader tab."
 				>
-					follower tab
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<span className="cursor-help">follower tab</span>
+						</TooltipTrigger>
+						<TooltipContent side="top">
+							You have opened ilovesql in multiple tabs. Only one tab can run queries
+							at a time, so queries from follower tabs are proxied to the leader tab
+							and may take longer. Close other tabs or refresh this tab to become the
+							leader.
+						</TooltipContent>
+					</Tooltip>
 				</span>
 			:	null}
 

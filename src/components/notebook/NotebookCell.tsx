@@ -131,11 +131,11 @@ export function NotebookCell({ cell, index, total }: NotebookCellProps) {
 
         {cell.type === 'sql' && run?.status === 'success' ? (
           <div className="flex items-center gap-1.5 font-mono text-[9.5px] text-muted-foreground/65">
-            <span className="size-1 rounded-full bg-success" />
+            <span className="text-success">●</span>
             <span>{formatDuration(run.durationMs)}</span>
             {rowCount > 0 ? (
               <>
-                <span className="text-muted-foreground/30">·</span>
+                <span className="text-muted-foreground/30">•</span>
                 <span>{formatNumber(rowCount)} rows</span>
               </>
             ) : null}
@@ -147,7 +147,7 @@ export function NotebookCell({ cell, index, total }: NotebookCellProps) {
             <CircleAlert className="size-3" />
             error
             {run.durationMs !== undefined ? (
-              <span className="text-destructive/60">· {formatDuration(run.durationMs)}</span>
+              <span className="text-destructive/60">• {formatDuration(run.durationMs)}</span>
             ) : null}
           </span>
         ) : null}
